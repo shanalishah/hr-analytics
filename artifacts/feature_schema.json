@@ -1,0 +1,39 @@
+{
+  "num_cols": [
+    "attendance_ratio_lkbk",
+    "avg_weekly_hours_lkbk",
+    "std_weekly_hours_lkbk",
+    "zero_weeks_lkbk",
+    "gap_days_since_work",
+    "timeoff_ratio_lkbk",
+    "nonpaid_abs_hours_lkbk",
+    "tardiness_hours_lkbk",
+    "left_early_hours_lkbk",
+    "sick_hours_lkbk",
+    "vac_hours_lkbk",
+    "Age"
+  ],
+  "cat_cols": [
+    "Trade",
+    "Dept"
+  ],
+  "all_cols": [
+    "EmployeeID",
+    "total_hours_lkbk",
+    "avg_weekly_hours_lkbk",
+    "std_weekly_hours_lkbk",
+    "zero_weeks_lkbk",
+    "gap_days_since_work",
+    "total_timeoff_hours_lkbk",
+    "sick_hours_lkbk",
+    "vac_hours_lkbk",
+    "nonpaid_abs_hours_lkbk",
+    "tardiness_hours_lkbk",
+    "left_early_hours_lkbk",
+    "attendance_ratio_lkbk",
+    "timeoff_ratio_lkbk",
+    "Age",
+    "Trade",
+    "Dept"
+  ]
+}
