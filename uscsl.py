@@ -53,20 +53,20 @@ st.info(
 )
 
 # -----------------------------------
-# Main Inputs (most impactful only)
+# Main Inputs (high impact)
 # -----------------------------------
 st.subheader("1) Attendance Behavior (Last 180 Days)")
 
 attendance_ratio = st.slider(
     "Attendance Ratio (hours worked ÷ expected hours)",
     min_value=0.0, max_value=1.2, value=0.80, step=0.01,
-    help="1.0 = meeting expected hours. Near 0.0 = barely worked."
+    help="1.0 = expected hours. Near 0.0 = low attendance."
 )
 
 avg_weekly_hours = st.slider(
     "Average Weekly Hours Worked",
     min_value=0.0, max_value=60.0, value=35.0, step=0.5,
-    help="Typical stable employees are near full-time hours."
+    help="Typical stable full-time workers are near full-time hours."
 )
 
 zero_weeks = st.slider(
@@ -86,28 +86,19 @@ st.subheader("2) Formal Absence")
 nonpaid_abs = st.slider(
     "Formal Absence Hours",
     min_value=0.0, max_value=80.0, value=5.0, step=0.5,
-    help="Formal unpaid absence recorded in TimeOff logs."
+    help="Unpaid leave time (rare among leavers)."
 )
 
 st.subheader("3) Role Information")
 
-# Use simple dropdowns — more user-friendly than free text.
 trade = st.selectbox(
     "Trade",
     ["CARP", "DW", "FIN", "INSUL", "PM", "FRM", "OTHER"],
     help="Select the employee’s trade category."
 )
 
-# dept = st.selectbox(
-#     "Department",
-#     ["FIELD", "ADMIN", "SUPER", "EXEC", "CONST", "EST", "USCA", "MKTG", "OTHER"],
-#     help="Select the employee’s department."
-# )
-
 # -----------------------------------
-# Build a single-row feature vector
-# We fill every expected model column with 0,
-# then overwrite the key ones from the UI.
+# Build feature row
 # -----------------------------------
 row = {c: 0 for c in ALL_COLS}
 
@@ -117,14 +108,17 @@ row.update({
     "zero_weeks_lkbk": zero_weeks,
     "gap_days_since_work": gap_days,
     "nonpaid_abs_hours_lkbk": nonpaid_abs,
-    "Trade": trade,
-    # "Dept": dept
+    "Trade": trade
 })
+
+# If model expects Dept column, fill it safely with a placeholder:
+if "Dept" in row:
+    row["Dept"] = "N/A"
 
 X_one = pd.DataFrame([row])
 
 # -----------------------------------
-# Predict button + output
+# Prediction Output
 # -----------------------------------
 st.markdown("---")
 if st.button("Predict Risk", type="primary"):
@@ -134,28 +128,23 @@ if st.button("Predict Risk", type="primary"):
     st.metric("Estimated Termination Risk", f"{risk:.2%}")
 
     if predicted_leave == 1:
-        st.error("Prediction: **Likely to Leave / Terminate**")
+        st.error("Prediction: **Likely to Leave**")
         st.write(
-            "This risk level resembles employees who showed strong disengagement "
-            "before exiting (low hours, zero-hour weeks, long gaps)."
+            "This pattern resembles employees showing disengagement before exiting."
         )
     else:
         st.success("Prediction: **Likely to Stay**")
-        st.write(
-            "This risk level resembles stable employees with consistent attendance."
-        )
+        st.write("Attendance and engagement patterns align with retained employees.")
 
-    st.caption("Note: Risk is based on behavior patterns observed over the last 180 days.")
+    st.caption("Model based on 180-day employee behavioral patterns.")
 
 with st.expander("What do these inputs mean?"):
     st.write(
         """
-- **Attendance Ratio:** how much someone worked versus expected hours.  
-- **Avg Weekly Hours:** average hours/week in the last 6 months.  
-- **Zero-Hour Weeks:** weeks they logged *no* hours at all.  
-- **Days Since Last Worked:** long gaps are a strong disengagement signal.  
-- **Non-Paid Absence Hours:** formal unpaid absences (rare among leavers).  
-
-These are the strongest early-warning signals identified from USC Builds HR data.
+- **Attendance Ratio:** % of expected hours worked  
+- **Avg Weekly Hours:** workload consistency  
+- **Zero-Hour Weeks:** repeated no-shows  
+- **Gap Days:** time since last activity  
+- **Absence Hours:** formal unpaid leave  
 """
     )
