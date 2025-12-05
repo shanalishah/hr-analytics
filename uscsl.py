@@ -118,7 +118,7 @@ row.update({
     "gap_days_since_work": gap_days,
     "nonpaid_abs_hours_lkbk": nonpaid_abs,
     "Trade": trade,
-    "Dept": dept
+    # "Dept": dept
 })
 
 X_one = pd.DataFrame([row])
