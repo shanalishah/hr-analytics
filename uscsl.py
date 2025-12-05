@@ -214,7 +214,7 @@ with st.expander("What do these inputs mean?"):
     st.write(
         """
 - **Attendance Ratio:** How much someone worked versus expected hours.  
-- **Avg Weekly Hours:** Average hours/week in the last 6 months.  
+- **Avg Weekly Hours:** Average hours/week.  
 - **Zero-Hour Weeks:** Weeks with *no* recorded hours at all.  
 - **Days Since Last Worked:** Long gaps are a strong disengagement signal.  
 - **Formal Absence Hours:** Formal absences (rare among leavers).  
