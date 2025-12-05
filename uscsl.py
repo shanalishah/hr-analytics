@@ -39,7 +39,7 @@ ALL_COLS = schema["all_cols"]
 # -----------------------------------
 # Header
 # -----------------------------------
-st.title("USC Builds — Termination Risk What-If Simulator")
+st.title("USC Builds Termination Risk What-If Simulator")
 st.write(
     """
 Adjust the inputs below to represent an employee’s **last 180-day behavior**.
