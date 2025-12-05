@@ -217,7 +217,7 @@ with st.expander("What do these inputs mean?"):
 - **Avg Weekly Hours:** Average hours/week in the last 6 months.  
 - **Zero-Hour Weeks:** Weeks with *no* recorded hours at all.  
 - **Days Since Last Worked:** Long gaps are a strong disengagement signal.  
-- **Non-Paid Absence Hours:** Formal unpaid absences (rare among leavers).  
+- **Formal Absence Hours:** Formal absences (rare among leavers).  
 
 These are the strongest early-warning signals identified from USC Builds HR data.
 """
