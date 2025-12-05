@@ -13,7 +13,7 @@ st.set_page_config(
 )
 
 ARTIFACT_DIR = "artifacts"
-MODEL_PATH  = os.path.join(ARTIFACT_DIR, "termination_model.joblib")
+MODEL_PATH = os.path.join(ARTIFACT_DIR, "termination_model.joblib")
 SCHEMA_PATH = os.path.join(ARTIFACT_DIR, "feature_schema.json")
 
 # -----------------------------------
@@ -29,9 +29,10 @@ def load_model_and_schema():
         st.stop()
 
     model = joblib.load(MODEL_PATH)
-    with open(SCEMA_PATH, "r") as f:
+    with open(SCHEMA_PATH, "r") as f:
         schema = json.load(f)
     return model, schema
+
 
 model, schema = load_model_and_schema()
 ALL_COLS = schema["all_cols"]
@@ -48,43 +49,64 @@ Then click **Predict Risk** to estimate whether the employee is likely to stay o
 )
 
 st.info(
-    "These inputs are the strongest predictors: attendance drop, fewer weekly hours, more zero-hour weeks, and long work gaps."
+    "These inputs are the **strongest predictors** from our analysis: "
+    "attendance drop, fewer weekly hours, more zero-hour weeks, and long work gaps."
 )
 
 # -----------------------------------
-# Main Inputs
+# Main Inputs (behavior only)
 # -----------------------------------
 st.subheader("1) Attendance Behavior (Last 180 Days)")
 
 attendance_ratio = st.slider(
     "Attendance Ratio (hours worked ÷ expected hours)",
-    min_value=0.0, max_value=1.2, value=0.80, step=0.01,
+    min_value=0.0,
+    max_value=1.2,
+    value=0.80,
+    step=0.01,
+    help="1.0 = meeting expected hours. Near 0.0 = very low attendance."
 )
 
 avg_weekly_hours = st.slider(
     "Average Weekly Hours Worked",
-    min_value=0.0, max_value=60.0, value=35.0, step=0.5,
+    min_value=0.0,
+    max_value=60.0,
+    value=35.0,
+    step=0.5,
+    help="Typical stable employees are near full-time hours."
 )
 
 zero_weeks = st.slider(
     "Weeks with 0 Recorded Hours",
-    min_value=0, max_value=26, value=2, step=1,
+    min_value=0,
+    max_value=26,
+    value=2,
+    step=1,
+    help="Higher values mean repeated no-show weeks."
 )
 
 gap_days = st.slider(
     "Days Since Last Worked",
-    min_value=0, max_value=180, value=15, step=1,
+    min_value=0,
+    max_value=180,
+    value=15,
+    step=1,
+    help="How long since this employee last clocked any hours."
 )
 
 st.subheader("2) Formal Absence")
 
 nonpaid_abs = st.slider(
-    "Formal Absence Hours",
-    min_value=0.0, max_value=80.0, value=5.0, step=0.5,
+    "Formal Absence Hours (Unpaid)",
+    min_value=0.0,
+    max_value=80.0,
+    value=5.0,
+    step=0.5,
+    help="Formal unpaid absence recorded in TimeOff logs."
 )
 
 # -----------------------------------
-# Build feature row (role columns defaulted)
+# Build a single-row feature vector
 # -----------------------------------
 row = {c: 0 for c in ALL_COLS}
 
@@ -96,36 +118,46 @@ row.update({
     "nonpaid_abs_hours_lkbk": nonpaid_abs,
 })
 
-# If model expects Trade/Dept columns, assign safe values
-if "Trade" in row:
-    row["Trade"] = "UNKNOWN"
-if "Dept" in row:
-    row["Dept"] = "UNKNOWN"
+# If model expects Trade/Dept or similar, give safe defaults
+for col in ["Trade", "Dept", "Department", "Role"]:
+    if col in row:
+        row[col] = "UNKNOWN"
 
 X_one = pd.DataFrame([row])
 
 # -----------------------------------
-# Prediction Output
+# Predict button + output
 # -----------------------------------
 st.markdown("---")
 if st.button("Predict Risk", type="primary"):
     risk = model.predict_proba(X_one)[0, 1]
-    prediction = "Likely to Leave" if risk >= 0.50 else "Likely to Stay"
+    predicted_leave = int(risk >= 0.50)
 
     st.metric("Estimated Termination Risk", f"{risk:.2%}")
 
-    if prediction == "Likely to Leave":
-        st.error(f"Prediction: **{prediction}**")
+    if predicted_leave == 1:
+        st.error("Prediction: **Likely to Leave / Terminate**")
+        st.write(
+            "This risk level resembles employees who showed strong disengagement "
+            "before exiting (low hours, zero-hour weeks, long gaps)."
+        )
     else:
-        st.success(f"Prediction: **{prediction}**")
+        st.success("Prediction: **Likely to Stay**")
+        st.write(
+            "This risk level resembles stable employees with consistent attendance."
+        )
+
+    st.caption("Note: Risk is based on behavior patterns observed over the last 180 days.")
 
 with st.expander("What do these inputs mean?"):
     st.write(
         """
-- **Attendance Ratio:** % of expected hours worked  
-- **Avg Weekly Hours:** workload consistency  
-- **Zero-Hour Weeks:** repeated no-shows  
-- **Gap Days:** time since last activity  
-- **Absence Hours:** formal unpaid leave  
+- **Attendance Ratio:** How much someone worked versus expected hours.  
+- **Avg Weekly Hours:** Average hours/week in the last 6 months.  
+- **Zero-Hour Weeks:** Weeks with *no* recorded hours at all.  
+- **Days Since Last Worked:** Long gaps are a strong disengagement signal.  
+- **Non-Paid Absence Hours:** Formal unpaid absences (rare among leavers).  
+
+These are the strongest early-warning signals identified from USC Builds HR data.
 """
     )
