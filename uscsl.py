@@ -3,6 +3,7 @@ import json
 import joblib
 import pandas as pd
 import streamlit as st
+import altair as alt
 
 # -----------------------------------
 # Config
@@ -135,6 +136,47 @@ if st.button("Predict Risk", type="primary"):
 
     st.metric("Estimated Termination Risk", f"{risk:.2%}")
 
+    # ------------------------------
+    # 🚦 VISUALIZATION BLOCK (ADDED)
+    # ------------------------------
+    st.write("### 📊 Risk Meter")
+
+    # --- Risk band wording ---
+    if risk < 0.33:
+        band = "LOW"
+        band_color = "#2ecc71"  # green
+        desc = "Pattern resembles stable retained employees."
+    elif risk < 0.66:
+        band = "MEDIUM"
+        band_color = "#f1c40f"  # yellow
+        desc = "Some indicators suggest possible turnover risk."
+    else:
+        band = "HIGH"
+        band_color = "#e74c3c"  # red
+        desc = "Pattern closely matches employees who eventually left."
+
+    # --- Altair bar gauge ---
+    gauge_df = pd.DataFrame({"Risk": ["Termination Risk"], "Value": [risk]})
+
+    gauge = (
+        alt.Chart(gauge_df)
+        .mark_bar(radius=6)
+        .encode(
+            x=alt.X("Value:Q", scale=alt.Scale(domain=[0,1]), axis=alt.Axis(format="%")),
+            color=alt.Color("Value:Q", scale=alt.Scale(
+                domain=[0, 0.33, 0.66, 1.0],
+                range=["#2ecc71", "#f1c40f", "#e67e22", "#e74c3c"]
+            ), legend=None)
+        )
+        .properties(width=400, height=40)
+    )
+
+    st.altair_chart(gauge, use_container_width=True)
+    st.write(f"**Risk Category:** `{band}`")
+    st.caption(desc)
+
+    # ------------------------------
+
     if predicted_leave == 1:
         st.error("Prediction: **Likely to Leave / Terminate**")
         st.write(
@@ -147,8 +189,11 @@ if st.button("Predict Risk", type="primary"):
             "This risk level resembles stable employees with consistent attendance."
         )
 
-    st.caption("Note: Risk is based on behavior patterns observed over the last 180 days.")
+    st.caption("Note: This model estimates risk based on behavioral trends over the last 180 days.")
 
+# -----------------------------------
+# Explanation Block
+# -----------------------------------
 with st.expander("What do these inputs mean?"):
     st.write(
         """
