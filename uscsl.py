@@ -98,11 +98,11 @@ trade = st.selectbox(
     help="Select the employee’s trade category."
 )
 
-dept = st.selectbox(
-    "Department",
-    ["FIELD", "ADMIN", "SUPER", "EXEC", "CONST", "EST", "USCA", "MKTG", "OTHER"],
-    help="Select the employee’s department."
-)
+# dept = st.selectbox(
+#     "Department",
+#     ["FIELD", "ADMIN", "SUPER", "EXEC", "CONST", "EST", "USCA", "MKTG", "OTHER"],
+#     help="Select the employee’s department."
+# )
 
 # -----------------------------------
 # Build a single-row feature vector
