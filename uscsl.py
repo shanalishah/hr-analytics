@@ -136,47 +136,61 @@ if st.button("Predict Risk", type="primary"):
 
     st.metric("Estimated Termination Risk", f"{risk:.2%}")
 
-    # ------------------------------
-    # 🚦 VISUALIZATION BLOCK (ADDED)
-    # ------------------------------
-    st.write("### 📊 Risk Meter")
-
-    # --- Risk band wording ---
+    # -----------------------------------
+    # Risk band (for text + color meaning)
+    # -----------------------------------
     if risk < 0.33:
         band = "LOW"
-        band_color = "#2ecc71"  # green
         desc = "Pattern resembles stable retained employees."
     elif risk < 0.66:
         band = "MEDIUM"
-        band_color = "#f1c40f"  # yellow
         desc = "Some indicators suggest possible turnover risk."
     else:
         band = "HIGH"
-        band_color = "#e74c3c"  # red
         desc = "Pattern closely matches employees who eventually left."
 
-    # --- Altair bar gauge ---
-    gauge_df = pd.DataFrame({"Risk": ["Termination Risk"], "Value": [risk]})
+    # -----------------------------------
+    # Horizontal gauge visualization
+    # -----------------------------------
+    st.write("### 📊 Risk Meter")
 
-    gauge = (
-        alt.Chart(gauge_df)
-        .mark_bar(radius=6)
+    # background "track"
+    bg_df = pd.DataFrame({"value": [1.0]})
+    background = (
+        alt.Chart(bg_df)
+        .mark_bar(color="#e6e6e6", cornerRadius=6)
         .encode(
-            x=alt.X("Value:Q", scale=alt.Scale(domain=[0,1]), axis=alt.Axis(format="%")),
-            color=alt.Color("Value:Q", scale=alt.Scale(
-                domain=[0, 0.33, 0.66, 1.0],
-                range=["#2ecc71", "#f1c40f", "#e67e22", "#e74c3c"]
-            ), legend=None)
+            x=alt.X("value:Q", scale=alt.Scale(domain=[0, 1])),
         )
-        .properties(width=400, height=40)
+        .properties(width=400, height=30)
     )
 
-    st.altair_chart(gauge, use_container_width=True)
+    # colored bar for actual risk
+    gauge_df = pd.DataFrame({"value": [risk]})
+    gauge = (
+        alt.Chart(gauge_df)
+        .mark_bar(cornerRadius=6)
+        .encode(
+            x=alt.X("value:Q", scale=alt.Scale(domain=[0, 1]), axis=None),
+            color=alt.Color(
+                "value:Q",
+                scale=alt.Scale(
+                    domain=[0, 0.33, 0.66, 1.0],
+                    range=["#2ecc71", "#f1c40f", "#e67e22", "#e74c3c"],
+                ),
+                legend=None,
+            ),
+        )
+        .properties(width=400, height=30)
+    )
+
+    st.altair_chart(background + gauge, use_container_width=False)
     st.write(f"**Risk Category:** `{band}`")
     st.caption(desc)
 
-    # ------------------------------
-
+    # -----------------------------------
+    # Textual prediction
+    # -----------------------------------
     if predicted_leave == 1:
         st.error("Prediction: **Likely to Leave / Terminate**")
         st.write(
@@ -189,7 +203,9 @@ if st.button("Predict Risk", type="primary"):
             "This risk level resembles stable employees with consistent attendance."
         )
 
-    st.caption("Note: This model estimates risk based on behavioral trends over the last 180 days.")
+    st.caption(
+        "Note: Risk is based on behavior patterns observed over the last 180 days."
+    )
 
 # -----------------------------------
 # Explanation Block
