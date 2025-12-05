@@ -81,10 +81,10 @@ gap_days = st.slider(
     help="How long since this employee last clocked any hours."
 )
 
-st.subheader("2) Formal Absence (Only Key Category)")
+st.subheader("2) Formal Absence")
 
 nonpaid_abs = st.slider(
-    "Non-Paid Absence Hours",
+    "Formal Absence Hours",
     min_value=0.0, max_value=80.0, value=5.0, step=0.5,
     help="Formal unpaid absence recorded in TimeOff logs."
 )
