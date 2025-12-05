@@ -37,6 +37,10 @@ def load_model_and_schema():
 model, schema = load_model_and_schema()
 ALL_COLS = schema["all_cols"]
 
+# Choose a typical default role context for the model
+DEFAULT_TRADE = "CARP"   # e.g., Carpenter
+DEFAULT_DEPT  = "FIELD"  # Field staff (majority group)
+
 # -----------------------------------
 # Header
 # -----------------------------------
@@ -162,7 +166,7 @@ if zero_weeks >= 3:
 if gap_days > 14:
     outlier_msgs.append("Extended gap since last worked; may indicate disengagement.")
 if nonpaid_abs > 20:
-    outlier_msgs.append("High unpaid absence, which can signal issues or disciplinary leave.")
+    outlier_msgs.append("High unpaid absence, which may reflect instability or issues.")
 if avg_weekly_hours < 30:
     outlier_msgs.append("Low average weekly hours for a full-time role.")
 if avg_weekly_hours > 48:
@@ -183,12 +187,10 @@ row.update({
     "zero_weeks_lkbk": zero_weeks,
     "gap_days_since_work": gap_days,
     "nonpaid_abs_hours_lkbk": nonpaid_abs,
+    # Hidden but important role context for the model
+    "Trade": DEFAULT_TRADE,
+    "Dept": DEFAULT_DEPT,
 })
-
-# If model expects role-related columns, assign safe defaults
-for col in ["Trade", "Dept", "Department", "Role"]:
-    if col in row:
-        row[col] = "UNKNOWN"
 
 X_one = pd.DataFrame([row])
 
