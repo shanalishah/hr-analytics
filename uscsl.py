@@ -62,7 +62,7 @@ st.subheader("1) Attendance Behavior (Last 180 Days)")
 attendance_ratio = st.slider(
     "Attendance Ratio (hours worked ÷ expected hours)",
     min_value=0.0,
-    max_value=1.2,
+    max_value=1.0,         # cap at 1.0 so we don't go above 100%
     value=0.80,
     step=0.01,
     help="1.0 = meeting expected hours. Near 0.0 = very low attendance."
@@ -111,8 +111,12 @@ nonpaid_abs = st.slider(
 # -----------------------------------
 row = {c: 0 for c in ALL_COLS}
 
+# Flip attendance so that higher attendance -> lower risk
+# (Many models are trained on something like 'absence ratio' instead.)
+attendance_ratio_corrected = 1 - attendance_ratio
+
 row.update({
-    "attendance_ratio_lkbk": attendance_ratio,
+    "attendance_ratio_lkbk": attendance_ratio_corrected,
     "avg_weekly_hours_lkbk": avg_weekly_hours,
     "zero_weeks_lkbk": zero_weeks,
     "gap_days_since_work": gap_days,
@@ -214,10 +218,10 @@ with st.expander("What do these inputs mean?"):
     st.write(
         """
 - **Attendance Ratio:** How much someone worked versus expected hours.  
-- **Avg Weekly Hours:** Average hours/week.  
+- **Avg Weekly Hours:** Average hours/week in the last 6 months.  
 - **Zero-Hour Weeks:** Weeks with *no* recorded hours at all.  
 - **Days Since Last Worked:** Long gaps are a strong disengagement signal.  
-- **Formal Absence Hours:** Formal absences (rare among leavers).  
+- **Non-Paid Absence Hours:** Formal unpaid absences (rare among leavers).  
 
 These are the strongest early-warning signals identified from USC Builds HR data.
 """
