@@ -8,7 +8,7 @@ import streamlit as st
 # Config
 # -----------------------------------
 st.set_page_config(
-    page_title="USC Builds - Termination Risk Simulator",
+    page_title="USC Builds Termination Risk Simulator",
     layout="centered"
 )
 
