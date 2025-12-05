@@ -97,7 +97,7 @@ gap_days = st.slider(
 st.subheader("2) Formal Absence")
 
 nonpaid_abs = st.slider(
-    "Formal Absence Hours (Unpaid)",
+    "Formal Absence Hours",
     min_value=0.0,
     max_value=80.0,
     value=5.0,
